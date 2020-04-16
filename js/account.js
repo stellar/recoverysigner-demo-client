@@ -82,6 +82,16 @@ class Account extends React.Component {
           Device Key: <SignerId config={this.props.config} id={this.state.deviceKey.publicKey()} /> / {this.state.deviceKey.secret()} {displayDeviceKeyReset && <button onClick={this.handleResetDeviceKey}>Reset</button>}<br/>
           Account: <AccountId id={this.state.account} /> Phone Number: {this.state.phoneNumber} <button onClick={this.handleClearAccount}>Clear</button><br/>
         </fieldset>
+        {this.state.account != '' &&
+          <span>
+            <BumpSeq
+              config={this.props.config}
+              account={this.state.account}
+              deviceKey={this.state.deviceKey}
+              onLog={this.props.onLog}
+            />
+          </span>
+        }
       </div>
     );
   }
