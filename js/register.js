@@ -65,11 +65,11 @@ class Register extends React.Component {
     await this.props.config.horizonServer.submitTransaction(transaction);
     this.props.onLog(<span>⏳ Submitted transaction <TxId id={transaction.hash().toString('hex')} /></span>);
 
-    const token1 = await this.authWithAccount(this.props.config.webauth1URL, masterKey.publicKey(), this.props.deviceKey);
-    const signer1 = await this.registerWithRecoverysigner(token1, this.props.config.recoverysigner1URL, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
+    const token1 = await this.authWithAccount(this.props.config.recoverysigners[0].webauthURL, masterKey.publicKey(), this.props.deviceKey);
+    const signer1 = await this.registerWithRecoverysigner(token1, this.props.config.recoverysigners[0].url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
 
-    const token2 = await this.authWithAccount(this.props.config.webauth2URL, masterKey.publicKey(), this.props.deviceKey);
-    const signer2 = await this.registerWithRecoverysigner(token2, this.props.config.recoverysigner2URL, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
+    const token2 = await this.authWithAccount(this.props.config.recoverysigners[1].webauthURL, masterKey.publicKey(), this.props.deviceKey);
+    const signer2 = await this.registerWithRecoverysigner(token2, this.props.config.recoverysigners[1].url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
 
     const transaction2 = new StellarSdk.TransactionBuilder(account,
       { fee: StellarSdk.BASE_FEE, networkPassphrase: this.props.config.networkPassphrase })

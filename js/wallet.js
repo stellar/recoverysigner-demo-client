@@ -10,13 +10,18 @@ class Wallet extends React.Component {
       horizonServerURL: "https://horizon-testnet.stellar.org",
       networkPassphrase: StellarSdk.Networks.TESTNET,
 
-      webauth1URL: "",
-      recoverysigner1FirebaseConfig: {apiKey:"", projectId:""},
-      recoverysigner1URL: "",
-
-      webauth2URL: "",
-      recoverysigner2FirebaseConfig: {apiKey:"", projectId:""},
-      recoverysigner2URL: "",
+      recoverysigners: [
+        {
+          url: "",
+          firebaseConfig: {apiKey:"", projectId:""},
+          webauthURL: "",
+        },
+        {
+          url: "",
+          firebaseConfig: {apiKey:"", projectId:""},
+          webauthURL: "",
+        }
+      ],
     };
 
     const hashStr = window.location.hash.substr(1);
@@ -44,30 +49,21 @@ class Wallet extends React.Component {
   }
 
   addDependenciesToConfig(config) {
-    let recoverysigner1Firebase;
-    try {
-      recoverysigner1Firebase = firebase.app(config.recoverysigner1FirebaseConfig.projectId);
-    } catch {
-      if (config.recoverysigner1FirebaseConfig.projectId != '') {
-        recoverysigner1Firebase = firebase.initializeApp(config.recoverysigner1FirebaseConfig, config.recoverysigner1FirebaseConfig.projectId);
+    const newConfig = JSON.parse(JSON.stringify(config));
+    newConfig.horizonServer = new StellarSdk.Server(config.horizonServerURL, {});
+    for (var i=0; i<config.recoverysigners.length; i++) {
+      const rsConfig = config.recoverysigners[i];
+      let fb;
+      try {
+        fb = firebase.app(rsConfig.firebaseConfig.projectId);
+      } catch {
+        if (rsConfig.firebaseConfig.projectId != '') {
+          fb = firebase.initializeApp(rsConfig.firebaseConfig, rsConfig.firebaseConfig.projectId);
+        }
       }
+      newConfig.recoverysigners[i].firebase = fb;
     }
-    let recoverysigner2Firebase;
-    try {
-      recoverysigner2Firebase = firebase.app(config.recoverysigner2FirebaseConfig.projectId);
-    } catch {
-      if (config.recoverysigner2FirebaseConfig.projectId != '') {
-        recoverysigner2Firebase = firebase.initializeApp(config.recoverysigner2FirebaseConfig, config.recoverysigner2FirebaseConfig.projectId);
-      }
-    }
-    return {
-      ...config,
-      ...{
-        horizonServer: new StellarSdk.Server(config.horizonServerURL, {}),
-        recoverysigner1Firebase: recoverysigner1Firebase,
-        recoverysigner2Firebase: recoverysigner2Firebase,
-      },
-    };
+    return newConfig;
   }
 
   render() {

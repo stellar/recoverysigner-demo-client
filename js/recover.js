@@ -46,8 +46,8 @@ class Recover extends React.Component {
   async recover() {
     this.props.onLog(<span>⏳ Recovering <AccountId id={this.state.account} />...</span>);
 
-    const auth1 = await this.authWithPhoneNumber(this.props.config.recoverysigner1Firebase, this.state.phoneNumber);
-    const auth2 = await this.authWithPhoneNumber(this.props.config.recoverysigner2Firebase, this.state.phoneNumber);
+    const auth1 = await this.authWithPhoneNumber(this.props.config.recoverysigners[0].firebase, this.state.phoneNumber);
+    const auth2 = await this.authWithPhoneNumber(this.props.config.recoverysigners[1].firebase, this.state.phoneNumber);
 
     const account = await this.props.config.horizonServer.loadAccount(this.state.account);
     const tx = new StellarSdk.TransactionBuilder(
@@ -58,8 +58,8 @@ class Recover extends React.Component {
       }))
       .build();
 
-    const sign1 = await this.signWithRecoverysigner(auth1, this.props.config.recoverysigner1URL, this.state.account, tx);
-    const sign2 = await this.signWithRecoverysigner(auth2, this.props.config.recoverysigner2URL, this.state.account, tx);
+    const sign1 = await this.signWithRecoverysigner(auth1, this.props.config.recoverysigners[0].url, this.state.account, tx);
+    const sign2 = await this.signWithRecoverysigner(auth2, this.props.config.recoverysigners[1].url, this.state.account, tx);
 
     tx.addSignature(sign1.signer, sign1.signature);
     tx.addSignature(sign2.signer, sign2.signature);
