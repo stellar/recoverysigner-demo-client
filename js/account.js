@@ -53,23 +53,16 @@ class Account extends React.Component {
   }
 
   render() {
+    const displayDeviceKeyReset = this.state.account == '';
     return (
       <div>
         {this.state.account == '' &&
-          <New
-            config={this.props.config}
-            onAccount={this.onAccount}
-            onLog={this.props.onLog}
-          />
-        }
-        <fieldset>
-          <legend>State</legend>
-          Device Key: <SignerId config={this.props.config} id={this.state.deviceKey.publicKey()} /> / {this.state.deviceKey.secret()} <button onClick={this.handleResetDeviceKey}>Reset</button><br/>
-          Account: <AccountId id={this.state.account} /> Phone Number: {this.state.phoneNumber} <button onClick={this.handleClearAccount}>Clear</button><br/>
-        </fieldset>
-
-        {this.state.account == '' &&
           <span>
+            <New
+              config={this.props.config}
+              onAccount={this.onAccount}
+              onLog={this.props.onLog}
+            />
             <Register
               config={this.props.config}
               deviceKey={this.state.deviceKey}
@@ -84,6 +77,11 @@ class Account extends React.Component {
             />
           </span>
         }
+        <fieldset>
+          <legend>State</legend>
+          Device Key: <SignerId config={this.props.config} id={this.state.deviceKey.publicKey()} /> / {this.state.deviceKey.secret()} {displayDeviceKeyReset && <button onClick={this.handleResetDeviceKey}>Reset</button>}<br/>
+          Account: <AccountId id={this.state.account} /> Phone Number: {this.state.phoneNumber} <button onClick={this.handleClearAccount}>Clear</button><br/>
+        </fieldset>
       </div>
     );
   }
