@@ -60,7 +60,7 @@ class Register extends React.Component {
       .build();
     transaction.sign(masterKey);
     this.props.onLog(`⏳ Submitting transaction ${transaction.hash().toString('hex')}...`);
-    this.props.onLog(`⏳ Adding device key (${this.props.deviceKey.publicKey()}) as signer (weight: 20)...`);
+    this.props.onLog(<span>⏳ Adding device key (<SignerId config={this.props.config} id={this.props.deviceKey.publicKey()} />) as signer (weight: 20)...</span>);
     this.props.onLog(`⏳ Removing master key as signer (weight: 0)...`);
     await this.props.config.horizonServer.submitTransaction(transaction);
     this.props.onLog(<span>⏳ Submitted transaction <TxId id={transaction.hash().toString('hex')} /></span>);
@@ -83,8 +83,8 @@ class Register extends React.Component {
       .build();
     transaction2.sign(this.props.deviceKey);
     this.props.onLog(`⏳ Submitting transaction ${transaction2.hash().toString('hex')}...`);
-    this.props.onLog(`⏳ Adding signing key ${signer1} as signer (weight: 10)...`);
-    this.props.onLog(`⏳ Adding signing key ${signer2} as signer (weight: 10)...`);
+    this.props.onLog(<span>⏳ Adding signing key <SignerId config={this.props.config} id={signer1} /> as signer (weight: 10)...</span>);
+    this.props.onLog(<span>⏳ Adding signing key <SignerId config={this.props.config} id={signer2} /> as signer (weight: 10)...</span>);
     await this.props.config.horizonServer.submitTransaction(transaction2);
     this.props.onLog(<span>⏳ Submitted transaction <TxId id={transaction2.hash().toString('hex')} /></span>);
 
@@ -134,7 +134,7 @@ class Register extends React.Component {
     });
     const json = await response.json();
 
-    this.props.onLog(<span>⏳ Registered with <a href={recoverysignerURL}>Recoverysigner</a>, signer: {json.signer}</span>);
+    this.props.onLog(<span>⏳ Registered with <a href={recoverysignerURL}>Recoverysigner</a>, signer: <SignerId config={this.props.config} id={json.signer} /></span>);
 
     return json.signer
   }

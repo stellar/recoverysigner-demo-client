@@ -11,7 +11,7 @@ class Account extends React.Component {
       this.props.onLog(`⏳ Generating device key: ${deviceKey.publicKey()}`);
     }
     const deviceKey = StellarSdk.Keypair.fromSecret(deviceKeySecret);
-    this.props.onLog(`📣 Using device key: ${deviceKey.publicKey()}`);
+    this.props.onLog(<span>📣 Using device key: <SignerId config={this.props.config} id={deviceKey.publicKey()} /></span>);
 
     let accountId = localStorage.getItem('accountId') || '';
     if (accountId != '') {
