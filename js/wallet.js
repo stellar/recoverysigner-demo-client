@@ -27,7 +27,7 @@ class Wallet extends React.Component {
     const hashStr = window.location.hash.substr(1);
     let config = {};
     if (hashStr != "") {
-      config = JSON.parse(decodeURIComponent(hashStr));
+      config = JSON.parse(atob(hashStr));
     }
 
     this.state = {
@@ -43,7 +43,7 @@ class Wallet extends React.Component {
   }
 
   onConfigChange(config) {
-    var url = '#'+encodeURIComponent(JSON.stringify(config));
+    var url = '#'+btoa(JSON.stringify(config));
     window.history.pushState(null, '', url);
     this.setState({logs: this.state.logs, config: config});
   }
