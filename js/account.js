@@ -2,6 +2,8 @@ class Account extends React.Component {
   constructor(props) {
     super(props);
     this.onAccount = this.onAccount.bind(this);
+    this.handleClearAccount = this.handleClearAccount.bind(this);
+    this.handleResetDeviceKey = this.handleResetDeviceKey.bind(this);
 
     let deviceKeySecret = localStorage.getItem('deviceKeySecret');
     if (deviceKeySecret == null) {
@@ -37,23 +39,37 @@ class Account extends React.Component {
     this.props.onLog(<span>📣 Account in use: <AccountId id={account} /> (Phone Number: {phoneNumber})</span>);
   }
 
+  handleClearAccount() {
+    this.onAccount('', '');
+    this.props.onLog(`✅ Account details cleared`);
+  }
+
+  handleResetDeviceKey() {
+    const deviceKey = StellarSdk.Keypair.random();
+    localStorage.setItem('deviceKeySecret', deviceKey.secret());
+    this.setState({deviceKey: deviceKey, account: this.state.account, phoneNumber: this.state.phoneNumber});
+    this.props.onLog(`⏳ Generating device key: ${deviceKey.publicKey()}`);
+    this.props.onLog(<span>📣 Using device key: <SignerId config={this.props.config} id={deviceKey.publicKey()} /></span>);
+  }
+
   render() {
     return (
       <div>
+        {this.state.account == '' &&
+          <New
+            config={this.props.config}
+            onAccount={this.onAccount}
+            onLog={this.props.onLog}
+          />
+        }
         <fieldset>
           <legend>State</legend>
-          Device Key: {this.state.deviceKey.publicKey()} / {this.state.deviceKey.secret()}<br/>
-          Account: <AccountId id={this.state.account} /><br/>
-          Phone Number: {this.state.phoneNumber}<br/>
+          Device Key: <SignerId config={this.props.config} id={this.state.deviceKey.publicKey()} /> / {this.state.deviceKey.secret()} <button onClick={this.handleResetDeviceKey}>Reset</button><br/>
+          Account: <AccountId id={this.state.account} /> Phone Number: {this.state.phoneNumber} <button onClick={this.handleClearAccount}>Clear</button><br/>
         </fieldset>
 
         {this.state.account == '' &&
           <span>
-            <New
-              config={this.props.config}
-              onAccount={this.onAccount}
-              onLog={this.props.onLog}
-            />
             <Register
               config={this.props.config}
               deviceKey={this.state.deviceKey}
@@ -64,21 +80,6 @@ class Account extends React.Component {
               config={this.props.config}
               deviceKey={this.state.deviceKey}
               onAccount={this.onAccount}
-              onLog={this.props.onLog}
-            />
-          </span>
-        }
-
-        {this.state.account != '' &&
-          <span>
-            <Clear
-              onAccount={this.onAccount}
-              onLog={this.props.onLog}
-            />
-            <BumpSeq
-              config={this.props.config}
-              account={this.state.account}
-              deviceKey={this.state.deviceKey}
               onLog={this.props.onLog}
             />
           </span>
