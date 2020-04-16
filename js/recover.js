@@ -64,7 +64,7 @@ class Recover extends React.Component {
     tx.addSignature(sign1.signer, sign1.signature);
     tx.addSignature(sign2.signer, sign2.signature);
 
-    this.props.onLog(`⏳ Submitting transaction ${tx.hash().toString('hex')}...`);
+    this.props.onLog(<span>⏳ Submitting transaction <TxXdr xdr={tx.toXDR('base64')} />...</span>);
     await this.props.config.horizonServer.submitTransaction(tx);
     this.props.onLog(<span>⏳ Submitted transaction <TxId id={tx.hash().toString('hex')} /></span>);
 
@@ -103,7 +103,7 @@ class Recover extends React.Component {
     });
     const json = await response.json();
 
-    this.props.onLog(<span>⏳ Signed transaction with <a href={recoverysignerURL}>Recoverysigner</a>, signer: {json.signer}, signature: {json.signature}</span>);
+    this.props.onLog(<span>⏳ Signed transaction with <a href={recoverysignerURL}>Recoverysigner</a>, signer: <SignerId config={this.props.config} id={json.signer} />, signature: {json.signature}</span>);
 
     return json
   }

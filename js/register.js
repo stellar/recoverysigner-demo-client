@@ -59,7 +59,7 @@ class Register extends React.Component {
       .setTimeout(30)
       .build();
     transaction.sign(masterKey);
-    this.props.onLog(`⏳ Submitting transaction ${transaction.hash().toString('hex')}...`);
+    this.props.onLog(<span>⏳ Submitting transaction <TxXdr xdr={transaction.toXDR('base64')} />...</span>);
     this.props.onLog(<span>⏳ Adding device key (<SignerId config={this.props.config} id={this.props.deviceKey.publicKey()} />) as signer (weight: 20)...</span>);
     this.props.onLog(`⏳ Removing master key as signer (weight: 0)...`);
     await this.props.config.horizonServer.submitTransaction(transaction);

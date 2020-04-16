@@ -56,7 +56,7 @@ class BumpSeq extends React.Component {
       .setTimeout(30)
       .build();
     tx.sign(this.props.deviceKey);
-    this.props.onLog(`⏳ Submitting transaction ${tx.hash().toString('hex')}...`);
+    this.props.onLog(<span>⏳ Submitting transaction <TxXdr xdr={tx.toXDR('base64')} />...</span>);
     await this.props.config.horizonServer.submitTransaction(tx);
     this.props.onLog(<span>⏳ Submitted transaction <TxId id={tx.hash().toString('hex')} /></span>);
 
