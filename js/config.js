@@ -26,6 +26,7 @@ class Config extends React.Component {
       <fieldset>
         <legend>Config</legend>
         <textarea value={json} rows={rows} cols={cols} onChange={this.handleChange} />
+        <div>Config stored in URL.</div>
       </fieldset>
     );
   }

@@ -74,9 +74,9 @@ class Wallet extends React.Component {
     const fullConfig = this.addDependenciesToConfig(this.state.config);
     return (
       <div>
-        <Config config={this.state.config} onConfigChange={this.onConfigChange} />
         <Account config={fullConfig} onLog={this.onLog} />
         <Logs logs={this.state.logs} />
+        <Config config={this.state.config} onConfigChange={this.onConfigChange} />
       </div>
     );
   }
