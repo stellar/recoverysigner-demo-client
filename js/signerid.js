@@ -9,7 +9,14 @@ class SignerId extends React.Component {
 
   render() {
     if (this.props.id != '') {
-      return <a href={this.baseURL+this.props.id} target="_blank" rel="noopener noreferrer">{this.props.id.slice(0,4)}</a>;
+      return (
+        <a href={this.baseURL+this.props.id} target="_blank" rel="noopener noreferrer">
+          {this.props.id.slice(0,4)}
+          ...
+          {this.props.id.slice(47,52)}
+          ...
+        </a>
+      );
     }
     return null;
   }
