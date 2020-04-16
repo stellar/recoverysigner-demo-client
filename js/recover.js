@@ -46,23 +46,27 @@ class Recover extends React.Component {
   async recover() {
     this.props.onLog(<span>⏳ Recovering <AccountId id={this.state.account} />...</span>);
 
-    const auth1 = await this.authWithPhoneNumber(this.props.config.recoverysigners[0].firebase, this.state.phoneNumber);
-    const auth2 = await this.authWithPhoneNumber(this.props.config.recoverysigners[1].firebase, this.state.phoneNumber);
+    let auths = [];
+    for(var i=0; i<this.props.config.recoverysigners.length; i++) {
+      const auth = await this.authWithPhoneNumber(this.props.config.recoverysigners[i].firebase, this.state.phoneNumber);
+      auths = auths.concat(auth);
+    }
 
     const account = await this.props.config.horizonServer.loadAccount(this.state.account);
     const tx = new StellarSdk.TransactionBuilder(
       account, { fee: StellarSdk.BASE_FEE, networkPassphrase: this.props.config.networkPassphrase })
       .setTimeout(30)
       .addOperation(StellarSdk.Operation.setOptions({
-        signer: { ed25519PublicKey: this.props.deviceKey.publicKey(), weight: 20 }
+        signer: { ed25519PublicKey: this.props.deviceKey.publicKey(), weight: 10*this.props.config.recoverysigners.length }
       }))
       .build();
 
-    const sign1 = await this.signWithRecoverysigner(auth1, this.props.config.recoverysigners[0].url, this.state.account, tx);
-    const sign2 = await this.signWithRecoverysigner(auth2, this.props.config.recoverysigners[1].url, this.state.account, tx);
 
-    tx.addSignature(sign1.signer, sign1.signature);
-    tx.addSignature(sign2.signer, sign2.signature);
+    for(var i=0; i<this.props.config.recoverysigners.length; i++) {
+      const auth = auths[i];
+      const sig = await this.signWithRecoverysigner(auth, this.props.config.recoverysigners[i].url, this.state.account, tx);
+      tx.addSignature(sig.signer, sig.signature);
+    }
 
     this.props.onLog(<span>⏳ Submitting transaction <TxXdr xdr={tx.toXDR('base64')} />...</span>);
     await this.props.config.horizonServer.submitTransaction(tx);

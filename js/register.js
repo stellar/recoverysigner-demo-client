@@ -51,42 +51,42 @@ class Register extends React.Component {
       { fee: StellarSdk.BASE_FEE, networkPassphrase: this.props.config.networkPassphrase })
       .addOperation(StellarSdk.Operation.setOptions({
         masterWeight: 0,
-        lowThreshold: 20,
-        medThreshold: 20,
-        highThreshold: 20,
-        signer: { ed25519PublicKey: this.props.deviceKey.publicKey(), weight: 20 }
+        lowThreshold: 10*this.props.config.recoverysigners.length,
+        medThreshold: 10*this.props.config.recoverysigners.length,
+        highThreshold: 10*this.props.config.recoverysigners.length,
+        signer: { ed25519PublicKey: this.props.deviceKey.publicKey(), weight: 10*this.props.config.recoverysigners.length }
       }))
       .setTimeout(30)
       .build();
     transaction.sign(masterKey);
     this.props.onLog(<span>⏳ Submitting transaction <TxXdr xdr={transaction.toXDR('base64')} />...</span>);
-    this.props.onLog(<span>⏳ Adding device key (<SignerId config={this.props.config} id={this.props.deviceKey.publicKey()} />) as signer (weight: 20)...</span>);
+    this.props.onLog(<span>⏳ Adding device key (<SignerId config={this.props.config} id={this.props.deviceKey.publicKey()} />) as signer (weight: {10*this.props.config.recoverysigners.length})...</span>);
     this.props.onLog(`⏳ Removing master key as signer (weight: 0)...`);
     await this.props.config.horizonServer.submitTransaction(transaction);
     this.props.onLog(<span>⏳ Submitted transaction <TxId id={transaction.hash().toString('hex')} /></span>);
 
-    const token1 = await this.authWithAccount(this.props.config.recoverysigners[0].webauthURL, masterKey.publicKey(), this.props.deviceKey);
-    const signer1 = await this.registerWithRecoverysigner(token1, this.props.config.recoverysigners[0].url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
+    let signers = [];
+    for (var i=0; i<this.props.config.recoverysigners.length; i++) {
+      const config = this.props.config.recoverysigners[i];
+      const token1 = await this.authWithAccount(config.webauthURL, masterKey.publicKey(), this.props.deviceKey);
+      const signer = await this.registerWithRecoverysigner(token1, config.url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
+      signers = signers.concat(signer)
+    }
 
-    const token2 = await this.authWithAccount(this.props.config.recoverysigners[1].webauthURL, masterKey.publicKey(), this.props.deviceKey);
-    const signer2 = await this.registerWithRecoverysigner(token2, this.props.config.recoverysigners[1].url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
-
-    const transaction2 = new StellarSdk.TransactionBuilder(account,
-      { fee: StellarSdk.BASE_FEE, networkPassphrase: this.props.config.networkPassphrase })
-      .addOperation(StellarSdk.Operation.setOptions({
-        signer: { ed25519PublicKey: signer1, weight: 10 }
+    const tx = new StellarSdk.TransactionBuilder(account, { fee: StellarSdk.BASE_FEE, networkPassphrase: this.props.config.networkPassphrase });
+    for (var i=0; i<signers.length; i++) {
+      tx.addOperation(StellarSdk.Operation.setOptions({
+        signer: { ed25519PublicKey: signers[i], weight: 10 }
       }))
-      .addOperation(StellarSdk.Operation.setOptions({
-        signer: { ed25519PublicKey: signer2, weight: 10 }
-      }))
-      .setTimeout(30)
-      .build();
-    transaction2.sign(this.props.deviceKey);
-    this.props.onLog(`⏳ Submitting transaction ${transaction2.hash().toString('hex')}...`);
-    this.props.onLog(<span>⏳ Adding signing key <SignerId config={this.props.config} id={signer1} /> as signer (weight: 10)...</span>);
-    this.props.onLog(<span>⏳ Adding signing key <SignerId config={this.props.config} id={signer2} /> as signer (weight: 10)...</span>);
-    await this.props.config.horizonServer.submitTransaction(transaction2);
-    this.props.onLog(<span>⏳ Submitted transaction <TxId id={transaction2.hash().toString('hex')} /></span>);
+    }
+    const txBuilt = tx.setTimeout(30).build();
+    txBuilt.sign(this.props.deviceKey);
+    this.props.onLog(`⏳ Submitting transaction ${txBuilt.hash().toString('hex')}...`);
+    for (var i=0; i<signers.length; i++) {
+      this.props.onLog(<span>⏳ Adding signing key <SignerId config={this.props.config} id={signers[i]} /> as signer (weight: 10)...</span>);
+    }
+    await this.props.config.horizonServer.submitTransaction(txBuilt);
+    this.props.onLog(<span>⏳ Submitted transaction <TxId id={txBuilt.hash().toString('hex')} /></span>);
 
     this.props.onLog(`✅ Registration complete`);
 
