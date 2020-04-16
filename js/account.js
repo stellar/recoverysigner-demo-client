@@ -49,6 +49,11 @@ class Account extends React.Component {
 
         {this.state.account == '' &&
           <span>
+            <New
+              config={this.props.config}
+              onAccount={this.onAccount}
+              onLog={this.props.onLog}
+            />
             <Register
               config={this.props.config}
               deviceKey={this.state.deviceKey}
