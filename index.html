@@ -2,15 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<style>
-body { font-family: sans-serif; }
-input { font-family: monospace; }
-ul { list-style: none; margin:0; padding-left: 0; }
-fieldset { margin-bottom: 10px; border:1px solid grey; }
-</style>
-</head>
-<body>
-<div id="root"></div>
+
+<link type="text/css" rel="stylesheet" href="css/style.css">
 
 <script src="https://www.gstatic.com/firebasejs/7.14.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.14.0/firebase-auth.js"></script>
@@ -33,6 +26,11 @@ fieldset { margin-bottom: 10px; border:1px solid grey; }
 <script type="text/babel" src="js/txxdr.js"></script>
 <script type="text/babel" src="js/bumpseq.js"></script>
 <script type="text/babel" src="js/wallet.js"></script>
+
+</head>
+<body>
+
+<div id="root"></div>
 
 <script type="text/babel">
 ReactDOM.render(<Wallet />, document.getElementById("root"));
