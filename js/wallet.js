@@ -51,20 +51,21 @@ class Wallet extends React.Component {
   addDependenciesToConfig(config) {
     const newConfig = JSON.parse(JSON.stringify(config));
     newConfig.horizonServer = new StellarSdk.Server(config.horizonServerURL, {});
-    if (newConfig.recoverysigners == null) {
-      newConfig.recoverysigners = [];
-    }
-    for (var i=0; i<newConfig.recoverysigners.length; i++) {
-      const rsConfig = newConfig.recoverysigners[i];
-      let fb;
-      try {
-        fb = firebase.app(rsConfig.firebaseConfig.projectId);
-      } catch {
-        if (rsConfig.firebaseConfig.projectId != '') {
-          fb = firebase.initializeApp(rsConfig.firebaseConfig, rsConfig.firebaseConfig.projectId);
+    try {
+      for (var i=0; i<newConfig.recoverysigners.length; i++) {
+        const rsConfig = newConfig.recoverysigners[i];
+        let fb;
+        try {
+          fb = firebase.app(rsConfig.firebaseConfig.projectId);
+        } catch {
+          if (rsConfig.firebaseConfig.projectId != '') {
+            fb = firebase.initializeApp(rsConfig.firebaseConfig, rsConfig.firebaseConfig.projectId);
+          }
         }
+        newConfig.recoverysigners[i].firebase = fb;
       }
-      newConfig.recoverysigners[i].firebase = fb;
+    } catch(e) {
+      console.log(e);
     }
     return newConfig;
   }
