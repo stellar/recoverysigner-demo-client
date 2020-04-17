@@ -104,6 +104,7 @@ class Register extends React.Component {
 
     const tokenResponse = await fetch(webauthURL, {
       method: "POST",
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({transaction: challengeTx.toXDR()})
     });
     const tokenJson = await tokenResponse.json();
@@ -129,7 +130,7 @@ class Register extends React.Component {
     };
     const response = await fetch(recoverysignerURL+'/accounts/'+account, {
       method: "POST",
-      headers: { 'Authorization': 'BEARER ' + authToken },
+      headers: { 'Authorization': 'BEARER ' + authToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     const json = await response.json();

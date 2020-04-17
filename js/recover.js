@@ -101,7 +101,7 @@ class Recover extends React.Component {
     };
     const response = await fetch(recoverysignerURL+'/accounts/'+account+'/sign', {
       method: "POST",
-      headers: { 'Authorization': 'BEARER ' + authToken },
+      headers: { 'Authorization': 'BEARER ' + authToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     const json = await response.json();
