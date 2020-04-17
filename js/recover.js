@@ -22,7 +22,7 @@ class Recover extends React.Component {
           <input placeholder="+1..." size={this.state.phoneNumber.length} value={this.state.phoneNumber} onChange={this.handlePhoneNumberChange} />
         </label>
         <button onClick={this.handleRecover}>Recover</button>
-        <div id="recaptcha"></div>
+        {this.props.config.recoverysigners.map((c, i) => <div key={`recaptcha${i}`} id={`recaptcha_${c.firebaseConfig.projectId}`}></div>)}
       </fieldset>
     );
   }
@@ -80,7 +80,7 @@ class Recover extends React.Component {
   async authWithPhoneNumber(fb, phoneNumber) {
     this.props.onLog(<span>⏳ Authenticating with Firebase <a href={`https://console.firebase.google.com/project/${fb.name}`}>{fb.name}</a> with {phoneNumber}...</span>);
 
-    var appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha', { "size": "invisible" }, fb);
+    var appVerifier = new firebase.auth.RecaptchaVerifier(`recaptcha_${fb.name}`, { "size": "invisible" }, fb);
     var provider = new firebase.auth.PhoneAuthProvider(fb.auth());
     const verificationId = await provider.verifyPhoneNumber(phoneNumber, appVerifier)
     const verificationCode = window.prompt('Please enter the verification code that was sent to your mobile device.', '111111');
