@@ -80,7 +80,6 @@ class Recover extends React.Component {
   async authWithPhoneNumber(fb, phoneNumber) {
     this.props.onLog(<span>⏳ Authenticating with Firebase <a href={`https://console.firebase.google.com/project/${fb.name}`}>{fb.name}</a> with {phoneNumber}...</span>);
 
-    fb.auth().settings.appVerificationDisabledForTesting = true;
     var appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha', { "size": "invisible" }, fb);
     var provider = new firebase.auth.PhoneAuthProvider(fb.auth());
     const verificationId = await provider.verifyPhoneNumber(phoneNumber, appVerifier)
