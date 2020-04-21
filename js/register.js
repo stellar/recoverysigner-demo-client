@@ -1,9 +1,10 @@
 class Register extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {seed: '', phoneNumber: '+17181111111'};
+    this.state = {seed: '', phoneNumber: '+17181111111', email: ''};
     this.handleSeedChange = this.handleSeedChange.bind(this);
     this.handlePhoneNumberChange = this.handlePhoneNumberChange.bind(this);
+    this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handleRegister = this.handleRegister.bind(this);
     this.register = this.register.bind(this);
     this.registerWithRecoverysigner = this.registerWithRecoverysigner.bind(this);
@@ -19,17 +20,24 @@ class Register extends React.Component {
         <label>
           Phone Number: <input placeholder="+1..." size={this.state.phoneNumber.length} value={this.state.phoneNumber} onChange={this.handlePhoneNumberChange} />
         </label>
+        <label>
+          Email: <input placeholder="user@example.com" size={this.state.email.length} value={this.state.email} onChange={this.handleEmailChange} />
+        </label>
         <button onClick={this.handleRegister}>Register</button>
       </fieldset>
     );
   }
 
   handleSeedChange(event) {
-    this.setState({seed: event.target.value, phoneNumber: this.state.phoneNumber})
+    this.setState({seed: event.target.value, phoneNumber: this.state.phoneNumber, email: this.state.email})
   }
 
   handlePhoneNumberChange(event) {
-    this.setState({seed: this.state.seed, phoneNumber: event.target.value})
+    this.setState({seed: this.state.seed, phoneNumber: event.target.value, email: this.state.email})
+  }
+
+  handleEmailChange(event) {
+    this.setState({seed: this.state.seed, phoneNumber: this.state.phoneNumber, email: event.target.value})
   }
 
   async handleRegister() {
@@ -69,7 +77,7 @@ class Register extends React.Component {
     for (var i=0; i<this.props.config.recoverysigners.length; i++) {
       const config = this.props.config.recoverysigners[i];
       const token1 = await this.authWithAccount(config.webauthURL, masterKey.publicKey(), this.props.deviceKey);
-      const signer = await this.registerWithRecoverysigner(token1, config.url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber);
+      const signer = await this.registerWithRecoverysigner(token1, config.url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber, this.state.email);
       signers = signers.concat(signer)
     }
 
@@ -115,19 +123,23 @@ class Register extends React.Component {
     return token
   }
 
-  async registerWithRecoverysigner(authToken, recoverysignerURL, account, deviceKey, phoneNumber) {
+  async registerWithRecoverysigner(authToken, recoverysignerURL, account, deviceKey, phoneNumber, email) {
     this.props.onLog(<span>⏳ Registering account with <a href={recoverysignerURL}>Recoverysigner</a>...</span>);
 
     const body = {
       identities: [
         {
           role: "owner",
-          auth_methods: [
-            { type: "phone_number", value: phoneNumber },
-          ],
+          auth_methods: [],
         },
       ],
     };
+    if (phoneNumber) {
+      body.identities[0].auth_methods.push({ type: "phone_number", value: phoneNumber });
+    }
+    if (email) {
+      body.identities[0].auth_methods.push({ type: "email", value: email });
+    }
     const response = await fetch(recoverysignerURL+'/accounts/'+account, {
       method: "POST",
       headers: { 'Authorization': 'BEARER ' + authToken, 'Content-Type': 'application/json' },

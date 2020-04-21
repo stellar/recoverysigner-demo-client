@@ -75,6 +75,12 @@ class Account extends React.Component {
               onAccount={this.onAccount}
               onLog={this.props.onLog}
             />
+            <RecoverWithEmailLink
+              config={this.props.config}
+              deviceKey={this.state.deviceKey}
+              onAccount={this.onAccount}
+              onLog={this.props.onLog}
+            />
           </span>
         }
         <fieldset>
