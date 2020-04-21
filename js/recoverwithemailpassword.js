@@ -1,18 +1,19 @@
-class RecoverWithEmailLink extends React.Component {
+class RecoverWithEmailPassword extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {account: '', email: ''};
+    this.state = {account: '', email: '', password: ''};
     this.handleAccountChange = this.handleAccountChange.bind(this);
     this.handleEmailChange = this.handleEmailChange.bind(this);
+    this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handleRecover = this.handleRecover.bind(this);
     this.recover = this.recover.bind(this);
-    this.authWithEmailLink = this.authWithEmailLink.bind(this);
+    this.authWithEmailPassword = this.authWithEmailPassword.bind(this);
   }
 
   render() {
     return (
       <fieldset>
-        <legend>Recover with Email Link</legend>
+        <legend>Recover with Email Password</legend>
         <label>
           Account:
           <input placeholder="G..." size={this.state.account.length} value={this.state.account} onChange={this.handleAccountChange} />
@@ -21,17 +22,25 @@ class RecoverWithEmailLink extends React.Component {
           Email:
           <input placeholder="user@example.com" size={this.state.email.length} value={this.state.email} onChange={this.handleEmailChange} />
         </label>
+        <label>
+          Password:
+          <input placeholder="..." size={this.state.password.length} value={this.state.password} onChange={this.handlePasswordChange} />
+        </label>
         <button onClick={this.handleRecover}>Recover</button>
       </fieldset>
     );
   }
 
   handleAccountChange(event) {
-    this.setState({account: event.target.value, email: this.state.email})
+    this.setState({account: event.target.value, email: this.state.email, password: this.state.password})
   }
 
   handleEmailChange(event) {
-    this.setState({account: this.state.account, email: event.target.value})
+    this.setState({account: this.state.account, email: event.target.value, password: this.state.password})
+  }
+
+  handlePasswordChange(event) {
+    this.setState({account: this.state.account, email: this.state.email, password: event.target.value})
   }
 
   async handleRecover() {
@@ -47,7 +56,7 @@ class RecoverWithEmailLink extends React.Component {
 
     let auths = [];
     for(var i=0; i<this.props.config.recoverysigners.length; i++) {
-      const auth = await this.authWithEmailLink(this.props.config.recoverysigners[i].firebase, this.state.email);
+      const auth = await this.authWithEmailPassword(this.props.config.recoverysigners[i].firebase, this.state.email, this.state.password);
       auths = auths.concat(auth);
     }
 
@@ -76,20 +85,29 @@ class RecoverWithEmailLink extends React.Component {
     this.props.onAccount(this.state.account, this.state.phoneNumber);
   }
 
-  async authWithEmailLink(fb, email) {
-    this.props.onLog(<span>⏳ Authenticating with Firebase <a href={`https://console.firebase.google.com/project/${fb.name}`}>{fb.name}</a> with {email}...</span>);
+  async authWithEmailPassword(fb, email, password) {
+    this.props.onLog(<span>⏳ Authenticating with Firebase <a href={`https://console.firebase.google.com/project/${fb.name}`}>{fb.name}</a> with {email} and {password.replace(/./g, '*')}...</span>);
 
-    const actionCodeSettings = {
-      url: 'http://localhost:8000',
-      handleCodeInApp: true,
-    };
+    let auth;
+    try {
+      auth = await fb.auth().createUserWithEmailAndPassword(email, password);
+    } catch {
+      auth = await fb.auth().signInWithEmailAndPassword(email, password);
+    }
 
-    await fb.auth().sendSignInLinkToEmail(email, actionCodeSettings);
-    const signInLink = window.prompt('Please enter the sign in link that was emailed.', '');
-    const auth = await fb.auth().signInWithEmailLink(email, signInLink)
-    const idToken = await auth.user.getIdToken();
+    if (!auth.user.emailVerified) {
+      const actionCodeSettings = {
+        url: 'http://localhost:8000',
+        handleCodeInApp: true,
+      };
+      await auth.user.sendEmailVerification(actionCodeSettings);
+      window.confirm('Please click the verification link in your email, then continue.');
+      await auth.user.reload();
+    }
 
-    this.props.onLog(<span>⏳ Authenticated with Firebase <a href={`https://console.firebase.google.com/project/${fb.name}`}>{fb.name}</a> with {email}</span>);
+    const idToken = await auth.user.getIdToken(true);
+
+    this.props.onLog(<span>⏳ Authenticated with Firebase <a href={`https://console.firebase.google.com/project/${fb.name}`}>{fb.name}</a> with {email} and {password.replace(/./g, '*')}...</span>);
 
     return idToken;
   }
