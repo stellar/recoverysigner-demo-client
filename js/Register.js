@@ -77,8 +77,10 @@ class Register extends React.Component {
     for (var i=0; i<this.props.config.recoverysigners.length; i++) {
       const config = this.props.config.recoverysigners[i];
       const token1 = await this.authWithAccount(config.webauthURL, masterKey.publicKey(), this.props.deviceKey);
-      const signer = await this.registerWithRecoverysigner(token1, config.url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber, this.state.email);
-      signers = signers.concat(signer)
+      const registeredSigners = await this.registerWithRecoverysigner(token1, config.url, masterKey.publicKey(), this.props.deviceKey, this.state.phoneNumber, this.state.email);
+      for (let registeredSigner of registeredSigners) {
+        signers.push(registeredSigner.key);
+      }
     }
 
     const tx = new StellarSdk.TransactionBuilder(account, { fee: StellarSdk.BASE_FEE, networkPassphrase: this.props.config.networkPassphrase });
@@ -149,6 +151,6 @@ class Register extends React.Component {
 
     this.props.onLog(<span>⏳ Registered with <a href={recoverysignerURL}>Recoverysigner</a>, signer: <SignerId config={this.props.config} id={json.signer} /></span>);
 
-    return json.signer
+    return json.signers
   }
 }
