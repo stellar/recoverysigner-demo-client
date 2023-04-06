@@ -120,7 +120,8 @@ class RecoverWithEmailPassword extends React.Component {
       headers: { 'Authorization': 'BEARER ' + authToken},
     })
     const accountsRespJson = await accountsResp.json();
-    //TODO handle case where signers[] has multiple keys
+    // Use the first signer key because it doesn't really matter which key we
+    // use since all the keys were added to the account during registration.
     const signer = accountsRespJson.signers[0].key;
     const body = {
       transaction: tx.toXDR('base64'),
