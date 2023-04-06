@@ -96,18 +96,25 @@ class Recover extends React.Component {
   async signWithRecoverysigner(authToken, recoverysignerURL, account, tx) {
     this.props.onLog(<span>⏳ Signing transaction to add device key with <a href={recoverysignerURL}>Recoverysigner</a>...</span>);
 
+    const accountsResp = await fetch(recoverysignerURL + '/accounts/'+account, {
+      method: "GET",
+      headers: { 'Authorization': 'BEARER ' + authToken},
+    })
+    const accountsRespJson = await accountsResp.json();
+    //TODO handle case where signers[] has multiple keys
+    const signer = accountsRespJson.signers[0].key;
     const body = {
       transaction: tx.toXDR('base64'),
     };
-    const response = await fetch(recoverysignerURL+'/accounts/'+account+'/sign', {
+    const response = await fetch(recoverysignerURL+'/accounts/'+account+'/sign/'+signer, {
       method: "POST",
       headers: { 'Authorization': 'BEARER ' + authToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     const json = await response.json();
 
-    this.props.onLog(<span>⏳ Signed transaction with <a href={recoverysignerURL}>Recoverysigner</a>, signer: <SignerId config={this.props.config} id={json.signer} />, signature: {json.signature}</span>);
+    this.props.onLog(<span>⏳ Signed transaction with <a href={recoverysignerURL}>Recoverysigner</a>, signer: <SignerId config={this.props.config} id={signer} />, signature: {json.signature}</span>);
 
-    return json
+    return {...json, signer: signer}
   }
 }

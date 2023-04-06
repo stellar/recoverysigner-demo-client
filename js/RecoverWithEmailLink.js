@@ -98,9 +98,9 @@ class RecoverWithEmailLink extends React.Component {
     this.props.onLog(<span>⏳ Signing transaction to add device key with <a href={recoverysignerURL}>Recoverysigner</a>...</span>);
 
     const accountsResp = await fetch(recoverysignerURL + '/accounts/'+account, {
-	      method: "GET",
-	      headers: { 'Authorization': 'BEARER ' + authToken},
-	})
+      method: "GET",
+      headers: { 'Authorization': 'BEARER ' + authToken},
+    })
     const accountsRespJson = await accountsResp.json();
     //TODO handle case where signers[] has multiple keys
     const signer = accountsRespJson.signers[0].key;
