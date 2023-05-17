@@ -80,8 +80,14 @@ class Recover extends React.Component {
   async authWithPhoneNumber(fb, phoneNumber) {
     this.props.onLog(<span>⏳ Authenticating with Firebase <a href={`https://console.firebase.google.com/project/${fb.name}`}>{fb.name}</a> with {phoneNumber}...</span>);
 
-    var appVerifier = new firebase.auth.RecaptchaVerifier(`recaptcha_${fb.name}`, { "size": "invisible" }, fb);
-    var provider = new firebase.auth.PhoneAuthProvider(fb.auth());
+    if (!window.recaptchaVerifiers) {
+      window.recaptchaVerifiers = {}
+    }
+    if (!window.recaptchaVerifiers[`recaptcha_${fb.name}`]) {
+      window.recaptchaVerifiers[`recaptcha_${fb.name}`] = new firebase.auth.RecaptchaVerifier(`recaptcha_${fb.name}`, { "size": "invisible" }, fb)
+    }
+    const appVerifier = window.recaptchaVerifiers[`recaptcha_${fb.name}`];
+    const provider = new firebase.auth.PhoneAuthProvider(fb.auth());
     const verificationId = await provider.verifyPhoneNumber(phoneNumber, appVerifier)
     const verificationCode = window.prompt('Please enter the verification code that was sent to your mobile device.', '111111');
     const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, verificationCode);
